@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from code_explainer.core.prompts import CodeAnalysis, DocumentedBlock, Refactoring, Severity
+from dev-assistant.core.prompts import CodeAnalysis, DocumentedBlock, Refactoring, Severity
 
 
 @pytest.fixture

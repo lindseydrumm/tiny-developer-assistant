@@ -7,16 +7,35 @@ interface layer is responsible for.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import pytest
 from typer.testing import CliRunner
 
-from code_explainer.core.analyzer import AnalysisRequest
-from code_explainer.core.errors import AuthenticationError, RateLimitError
-from code_explainer.interface import cli
+from dev-assistant.core.analyzer import AnalysisRequest
+from dev-assistant.core.errors import (
+    AuthenticationError,
+    InputValidationError,
+    RateLimitError,
+)
+from dev-assistant.interface import cli
 from tests.helpers import PLACEHOLDER_KEY
 
 runner = CliRunner()
+
+
+class FakeStdin:
+    """Stands in for `sys.stdin` so tests can simulate a terminal."""
+
+    def __init__(self, text: str, *, isatty: bool) -> None:
+        self._text = text
+        self._isatty = isatty
+
+    def isatty(self) -> bool:
+        return self._isatty
+
+    def read(self) -> str:
+        return self._text
 
 
 class StubAnalyzer:
@@ -100,6 +119,28 @@ class TestInput:
         runner.invoke(cli.app, ["-m", "gemini-2.5-pro"], input="x = 1")
 
         assert seen["model"] == "gemini-2.5-pro"
+
+    def test_bare_command_in_a_terminal_shows_usage(self, monkeypatch):
+        """No redirection and no argument: the user needs help, not a hang."""
+        monkeypatch.setattr(cli.sys, "stdin", FakeStdin("", isatty=True))
+
+        with pytest.raises(InputValidationError) as caught:
+            cli._read_source(None)
+
+        message = str(caught.value)
+        assert "explain -" in message
+        assert "pbpaste | explain" in message
+
+    def test_dash_in_a_terminal_accepts_a_paste(self, monkeypatch):
+        """An explicit `-` means stdin even when that stdin is a keyboard."""
+        monkeypatch.setattr(
+            cli.sys, "stdin", FakeStdin("def add(a, b):\n    return a + b\n", isatty=True)
+        )
+
+        code, name = cli._read_source(Path("-"))
+
+        assert code.startswith("def add")
+        assert name is None
 
     def test_rejects_non_utf8_file(self, stub, tmp_path):
         target = tmp_path / "blob.bin"

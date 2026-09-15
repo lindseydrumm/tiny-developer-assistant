@@ -9,7 +9,7 @@ Two invariants this module upholds:
 
 * Nothing leaves ``generate_structured`` except a validated instance of the
   caller's schema. Raw model text never escapes (CONSTITUTION.md II.2).
-* Every provider exception is translated into a :mod:`code_explainer.core.errors`
+* Every provider exception is translated into a :mod:`dev-assistant.core.errors`
   type carrying a message a user can act on (CONSTITUTION.md III.2).
 """
 
@@ -23,8 +23,8 @@ from google.genai import errors as genai_errors
 from google.genai import types
 from pydantic import BaseModel, ValidationError
 
-from code_explainer.config import Settings
-from code_explainer.core.errors import (
+from dev-assistant.config import Settings
+from dev-assistant.core.errors import (
     AuthenticationError,
     ConfigurationError,
     RateLimitError,

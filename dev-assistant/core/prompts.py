@@ -43,7 +43,7 @@ class DocumentedBlock(BaseModel):
     )
     explanation: str = Field(
         description=(
-            "What this block does and why it exists. Explain intent and any "
+            "What this block does and why it exists. Use simple and straight-foreward language. Explain intent and any "
             "non-obvious mechanics, not a word-for-word restatement of the code."
         )
     )

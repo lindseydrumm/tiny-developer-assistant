@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from code_explainer.core.prompts import (
+from dev-assistant.core.prompts import (
     SYSTEM_PROMPT,
     CodeAnalysis,
     build_user_prompt,

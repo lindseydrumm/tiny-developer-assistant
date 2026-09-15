@@ -10,7 +10,7 @@ from __future__ import annotations
 from pydantic import Field, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from code_explainer.core.errors import ConfigurationError
+from dev-assistant.core.errors import ConfigurationError
 
 
 class Settings(BaseSettings):

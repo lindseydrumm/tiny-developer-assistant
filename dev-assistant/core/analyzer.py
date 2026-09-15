@@ -1,8 +1,8 @@
 """Business logic: validate a snippet, get it analyzed, hand back the result.
 
-Imports nothing from :mod:`code_explainer.interface` and never prints
+Imports nothing from :mod:`dev-assistant.interface` and never prints
 (CONSTITUTION.md III.1). It talks to the provider only through the
-:class:`~code_explainer.core.llm_client.StructuredLLMClient` protocol, so tests
+:class:`~dev-assistant.core.llm_client.StructuredLLMClient` protocol, so tests
 substitute a fake client and exercise this layer with no network.
 """
 
@@ -10,10 +10,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from code_explainer.config import Settings
-from code_explainer.core.errors import InputValidationError
-from code_explainer.core.llm_client import StructuredLLMClient, build_client
-from code_explainer.core.prompts import (
+from dev-assistant.config import Settings
+from dev-assistant.core.errors import InputValidationError
+from dev-assistant.core.llm_client import StructuredLLMClient, build_client
+from dev-assistant.core.prompts import (
     SYSTEM_PROMPT,
     CodeAnalysis,
     build_user_prompt,

@@ -1,7 +1,7 @@
 """Command-line entry point.
 
 The only layer that reads argv, touches the filesystem, or writes to a stream.
-It catches :class:`~code_explainer.core.errors.CodeExplainerError` and prints
+It catches :class:`~dev-assistant.core.errors.CodeExplainerError` and prints
 ``str(exc)`` -- users see guidance, never a traceback (CONSTITUTION.md III.2).
 """
 
@@ -14,11 +14,11 @@ from typing import Optional
 
 import typer
 
-from code_explainer import __version__
-from code_explainer.config import load_settings
-from code_explainer.core.analyzer import AnalysisRequest, build_analyzer
-from code_explainer.core.errors import CodeExplainerError, InputValidationError
-from code_explainer.core.prompts import CodeAnalysis, Severity
+from dev-assistant import __version__
+from dev-assistant.config import load_settings
+from dev-assistant.core.analyzer import AnalysisRequest, build_analyzer
+from dev-assistant.core.errors import CodeExplainerError, InputValidationError
+from dev-assistant.core.prompts import CodeAnalysis, Severity
 
 app = typer.Typer(
     add_completion=False,
@@ -103,11 +103,23 @@ def _read_source(path: Optional[Path]) -> tuple[str, Optional[str]]:
     compiles, or runs it (CONSTITUTION.md II.3).
     """
     if path is None or str(path) == "-":
+        # A bare `explain` in a terminal is almost always a mistake, so it gets
+        # usage help. An explicit `-` is the conventional "I mean stdin", so it
+        # opens for typing or pasting instead.
+        asked_for_stdin = path is not None
         if sys.stdin.isatty():
-            raise InputValidationError(
-                "No input. Pass a file path, or pipe code in:\n"
-                "  explain path/to/file.py\n"
-                "  cat file.py | explain"
+            if not asked_for_stdin:
+                raise InputValidationError(
+                    "No input. Paste a snippet, point at a file, or pipe code in:\n"
+                    "  explain -                     paste, then press Ctrl-D\n"
+                    "  explain path/to/file.py\n"
+                    "  pbpaste | explain             analyze the clipboard"
+                )
+            typer.secho(
+                "Reading from stdin -- paste your code, then press Ctrl-D on a "
+                "blank line.",
+                fg=typer.colors.BRIGHT_BLACK,
+                err=True,
             )
         return sys.stdin.read(), None
 
