@@ -1,4 +1,4 @@
-# Code Explainer
+# Dev Assistant
 
 Takes a code snippet, asks an LLM to analyze it, and prints structured
 documentation: a **summary**, **block-by-block documentation**, and
@@ -50,12 +50,20 @@ using it will produce a venv this project cannot install into.
 uv venv --python 3.13
 uv pip install -e ".[dev]"
 
-# 2. Get a free API key from https://aistudio.google.com/apikey
+# 2. Activate  -- required before `explain` is on your PATH
+source .venv/bin/activate
 
-# 3. Configure
+# 3. Get a free API key from https://aistudio.google.com/apikey
+
+# 4. Configure
 cp .env.example .env
 # then paste your key into .env
 ```
+
+Activate the venv in every new shell, or skip activation and call
+`.venv/bin/explain` directly. If `explain` reports *command not found*, the
+venv is not active. If it fails with a `ModuleNotFoundError`, you are running
+a copy installed somewhere else — check with `which -a explain`.
 
 <details>
 <summary>Without <code>uv</code></summary>
@@ -122,6 +130,11 @@ alone.
 | `--json` | | Emit the validated JSON instead of prose. |
 | `--version` | | Print the version and exit. |
 
+While the request is in flight a spinner is shown. It is written to stderr and
+only when stderr is a terminal, so `explain f.py --json > out.json` and
+`explain f.py | less` are unaffected — piped output never contains progress
+characters.
+
 ### Configuration
 
 Every setting is read from the environment or `.env`. Only the key is required.
@@ -136,7 +149,7 @@ Every setting is read from the environment or `.env`. Only the key is required.
 
 ### A note on the free tier
 
-`gemini-2.5-flash` has a generous free quota and is the default.
+`gemini-3.6-flash` has a generous free quota and is the default.
 `gemini-2.5-pro` gives noticeably better analysis on dense code but has a much
 lower free daily limit — worth switching to per-run with `-m` when a snippet
 warrants it.
@@ -208,7 +221,7 @@ the CLI prints the message rather than a traceback.
 ## Development
 
 ```bash
-pytest              # 68 tests, no network, no credentials
+pytest              # no network, no credentials required
 ```
 
 The suite builds real `google.genai` response objects rather than mocks, so

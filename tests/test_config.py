@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from dev-assistant import config
-from dev-assistant.config import Settings, load_settings
-from dev-assistant.core.errors import ConfigurationError
+from dev_assistant import config
+from dev_assistant.config import Settings, load_settings
+from dev_assistant.core.errors import ConfigurationError
 from tests.helpers import PLACEHOLDER_KEY
 
 

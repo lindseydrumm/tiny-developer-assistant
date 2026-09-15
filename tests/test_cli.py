@@ -12,13 +12,13 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from dev-assistant.core.analyzer import AnalysisRequest
-from dev-assistant.core.errors import (
+from dev_assistant.core.analyzer import AnalysisRequest
+from dev_assistant.core.errors import (
     AuthenticationError,
     InputValidationError,
     RateLimitError,
 )
-from dev-assistant.interface import cli
+from dev_assistant.interface import cli
 from tests.helpers import PLACEHOLDER_KEY
 
 runner = CliRunner()

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from dev-assistant.core.analyzer import AnalysisRequest, CodeAnalyzer
-from dev-assistant.core.errors import InputValidationError
-from dev-assistant.core.prompts import SYSTEM_PROMPT, CodeAnalysis
+from dev_assistant.core.analyzer import AnalysisRequest, CodeAnalyzer
+from dev_assistant.core.errors import InputValidationError
+from dev_assistant.core.prompts import SYSTEM_PROMPT, CodeAnalysis
 
 
 class FakeClient:

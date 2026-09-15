@@ -12,18 +12,18 @@ import pytest
 from google.genai import errors as genai_errors
 from google.genai import types
 
-from dev-assistant.core.errors import (
+from dev_assistant.core.errors import (
     AuthenticationError,
     RateLimitError,
     ResponseValidationError,
     ServiceError,
 )
-from dev-assistant.core.llm_client import (
+from dev_assistant.core.llm_client import (
     _excerpt,
     _extract,
     _translate_api_error,
 )
-from dev-assistant.core.prompts import CodeAnalysis, Severity
+from dev_assistant.core.prompts import CodeAnalysis, Severity
 from tests.helpers import analysis_payload, make_response
 
 
