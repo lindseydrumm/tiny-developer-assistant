@@ -1,4 +1,4 @@
-# Code Explainer
+# Dev Assistant
 
 Takes a code snippet, asks an LLM to analyze it, and prints structured
 documentation: a **summary**, **block-by-block documentation**, and
@@ -42,19 +42,46 @@ SUGGESTED REFACTORINGS
 
 ## Setup
 
-Requires Python 3.10 or newer.
+Requires **Python 3.10 or newer**. Note that the `python3` on macOS is 3.9 —
+using it will produce a venv this project cannot install into.
 
 ```bash
-# 1. Install
-python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
+# 1. Install  (uv picks a suitable interpreter for you)
+uv venv --python 3.13
+uv pip install -e ".[dev]"
 
-# 2. Get a free API key from https://aistudio.google.com/apikey
+# 2. Activate  -- required before `explain` is on your PATH
+source .venv/bin/activate
 
-# 3. Configure
+# 3. Get a free API key from https://aistudio.google.com/apikey
+
+# 4. Configure
 cp .env.example .env
 # then paste your key into .env
 ```
+
+Activate the venv in every new shell, or skip activation and call
+`.venv/bin/explain` directly. If `explain` reports *command not found*, the
+venv is not active. If it fails with a `ModuleNotFoundError`, you are running
+a copy installed somewhere else — check with `which -a explain`.
+
+<details>
+<summary>Without <code>uv</code></summary>
+
+Point `venv` at a 3.10+ interpreter explicitly rather than using bare
+`python3`:
+
+```bash
+python3.13 -m venv .venv        # or python3.12, python3.11, python3.10
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+`python3.13 --version` should report 3.13.x before you start. If the venv was
+built with 3.9 you will see `ERROR: Package requires a different Python`
+from pip — delete `.venv` and rebuild it with a newer interpreter.
+
+</details>
 
 `.env` is git-ignored. The application reads configuration only from the
 environment — no key is ever stored in source.
@@ -71,6 +98,30 @@ explain file.py -f "is this thread safe?"   # steer the analysis
 explain file.py -m gemini-2.5-pro    # use a different model for one run
 ```
 
+### Pasting a snippet
+
+To analyze a function you have in your clipboard or want to type inline,
+without saving it to a file first:
+
+```bash
+pbpaste | explain                    # macOS: analyze the clipboard directly
+```
+
+```bash
+explain -                            # paste, then press Ctrl-D
+```
+
+```bash
+explain <<'EOF'                      # paste between the markers
+def slugify(text):
+    return text.lower().replace(" ", "-")
+EOF
+```
+
+`pbpaste | explain` is usually the best. Quote the heredoc marker as
+`<<'EOF'` so the shell leaves `$variables` and backticks in your snippet
+alone.
+
 | Flag | Short | Purpose |
 |---|---|---|
 | `--language` | `-l` | Language hint. Inferred when omitted. |
@@ -79,6 +130,11 @@ explain file.py -m gemini-2.5-pro    # use a different model for one run
 | `--json` | | Emit the validated JSON instead of prose. |
 | `--version` | | Print the version and exit. |
 
+While the request is in flight a spinner is shown. It is written to stderr and
+only when stderr is a terminal, so `explain f.py --json > out.json` and
+`explain f.py | less` are unaffected — piped output never contains progress
+characters.
+
 ### Configuration
 
 Every setting is read from the environment or `.env`. Only the key is required.
@@ -86,14 +142,14 @@ Every setting is read from the environment or `.env`. Only the key is required.
 | Variable | Default | Purpose |
 |---|---|---|
 | `GEMINI_API_KEY` | *(required)* | Google AI Studio key. |
-| `GEMINI_MODEL` | `gemini-2.5-flash` | Any model your key can reach. |
+| `GEMINI_MODEL` | `gemini-3.6-flash` | Any model your key can reach. |
 | `REQUEST_TIMEOUT` | `60.0` | Per-request timeout, in seconds. |
 | `MAX_RETRIES` | `3` | Retries for throttling and server errors. |
 | `MAX_SNIPPET_CHARS` | `100000` | Reject larger snippets before spending a request. |
 
 ### A note on the free tier
 
-`gemini-2.5-flash` has a generous free quota and is the default.
+`gemini-3.6-flash` has a generous free quota and is the default.
 `gemini-2.5-pro` gives noticeably better analysis on dense code but has a much
 lower free daily limit — worth switching to per-run with `-m` when a snippet
 warrants it.
@@ -165,7 +221,7 @@ the CLI prints the message rather than a traceback.
 ## Development
 
 ```bash
-pytest              # 68 tests, no network, no credentials
+pytest              # no network, no credentials required
 ```
 
 The suite builds real `google.genai` response objects rather than mocks, so

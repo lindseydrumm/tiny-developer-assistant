@@ -1,6 +1,6 @@
-"""Configuration, sourced strictly from the environment.
+"""Configuration settings, sourced strictly from the environment.
 
-CONSTITUTION.md II.1: no key, secret, or credential may appear in source code,
+CONSTITUTION.md II.1: no key, secret, or credentials may appear in source code,
 default arguments, or tests. ``gemini_api_key`` below has no default -- if the
 environment does not supply it, construction fails loudly.
 """
@@ -10,7 +10,7 @@ from __future__ import annotations
 from pydantic import Field, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from code_explainer.core.errors import ConfigurationError
+from dev_assistant.core.errors import ConfigurationError
 
 
 class Settings(BaseSettings):
@@ -28,7 +28,7 @@ class Settings(BaseSettings):
         description="Google AI Studio API key. Required; never has a default.",
     )
     gemini_model: str = Field(
-        default="gemini-2.5-flash",
+        default="gemini-3.6-flash",
         description="Model id. Flash is the free-tier workhorse.",
     )
     request_timeout: float = Field(
@@ -50,7 +50,7 @@ class Settings(BaseSettings):
 
 
 def load_settings(**overrides: object) -> Settings:
-    """Build :class:`Settings`, translating validation noise into guidance.
+    """Build :class:`Settings` with interface-generated overrides if applicable, translating validation errors into actionable message.
 
     ``**overrides`` lets the interface layer apply command-line flags on top of
     the environment without reaching into pydantic internals.

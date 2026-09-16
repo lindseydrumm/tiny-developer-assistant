@@ -7,9 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from code_explainer import config
-from code_explainer.config import Settings, load_settings
-from code_explainer.core.errors import ConfigurationError
+from dev_assistant import config
+from dev_assistant.config import Settings, load_settings
+from dev_assistant.core.errors import ConfigurationError
 from tests.helpers import PLACEHOLDER_KEY
 
 
@@ -40,7 +40,7 @@ class TestLoadSettings:
     def test_defaults_to_a_free_tier_model(self, monkeypatch):
         monkeypatch.setenv("GEMINI_API_KEY", PLACEHOLDER_KEY)
 
-        assert load_settings().gemini_model == "gemini-2.5-flash"
+        assert load_settings().gemini_model == "gemini-3.6-flash"
 
     def test_environment_overrides_the_defaults(self, monkeypatch):
         monkeypatch.setenv("GEMINI_API_KEY", PLACEHOLDER_KEY)
