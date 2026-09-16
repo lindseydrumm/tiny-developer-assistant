@@ -142,7 +142,7 @@ Every setting is read from the environment or `.env`. Only the key is required.
 | Variable | Default | Purpose |
 |---|---|---|
 | `GEMINI_API_KEY` | *(required)* | Google AI Studio key. |
-| `GEMINI_MODEL` | `gemini-2.5-flash` | Any model your key can reach. |
+| `GEMINI_MODEL` | `gemini-3.6-flash` | Any model your key can reach. |
 | `REQUEST_TIMEOUT` | `60.0` | Per-request timeout, in seconds. |
 | `MAX_RETRIES` | `3` | Retries for throttling and server errors. |
 | `MAX_SNIPPET_CHARS` | `100000` | Reject larger snippets before spending a request. |

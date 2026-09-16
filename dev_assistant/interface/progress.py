@@ -1,16 +1,10 @@
-"""A minimal progress indicator for work that takes a noticeable moment.
+"""A minimal progress indicator while the model is working.
 
 Part of the interface layer: ``core`` never reports progress, it just takes
 time. The analyzer stays unaware that anything is watching it.
 
-Two rules keep this from corrupting output:
-
-* everything is written to **stderr**, so ``--json`` stays pipeable;
-* nothing is written at all unless that stream is a terminal, so redirecting
-  to a file never collects escape codes.
-
-Standard library only, per CONSTITUTION.md III.3.
-"""
+Everything is written to **stderr** and nothing is written at all unless that 
+stream is a terminal."""
 
 from __future__ import annotations
 
@@ -37,14 +31,8 @@ def _frames_for(stream: IO[str]) -> str:
 
 
 class Spinner:
-    """Animate a one-line status on stderr for the duration of a ``with`` block.
-
-    A no-op when stderr is not a terminal, so piped and redirected runs are
-    byte-for-byte unchanged.
-
-    >>> with Spinner("Analyzing..."):
-    ...     result = slow_call()
-    """
+    """Animate a one-line status on stderr while output loads that does not show up
+    outside of a terminal, like when the output is saved.  """
 
     def __init__(
         self,
@@ -82,8 +70,8 @@ class Spinner:
     ) -> None:
         """Stop and erase the line.
 
-        Returns ``None`` so exceptions keep propagating -- the caller's error
-        message must still reach the user, on a clean line.
+        Returns ``None`` so the caller's error message must can still reach 
+        the user, on a clean line.
         """
         self._stop.set()
         if self._thread is not None:

@@ -1,6 +1,6 @@
-"""Configuration, sourced strictly from the environment.
+"""Configuration settings, sourced strictly from the environment.
 
-CONSTITUTION.md II.1: no key, secret, or credential may appear in source code,
+CONSTITUTION.md II.1: no key, secret, or credentials may appear in source code,
 default arguments, or tests. ``gemini_api_key`` below has no default -- if the
 environment does not supply it, construction fails loudly.
 """
@@ -50,7 +50,7 @@ class Settings(BaseSettings):
 
 
 def load_settings(**overrides: object) -> Settings:
-    """Build :class:`Settings`, translating validation noise into guidance.
+    """Build :class:`Settings` with interface-generated overrides if applicable, translating validation errors into actionable message.
 
     ``**overrides`` lets the interface layer apply command-line flags on top of
     the environment without reaching into pydantic internals.

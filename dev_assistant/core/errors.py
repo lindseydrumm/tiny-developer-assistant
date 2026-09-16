@@ -2,8 +2,7 @@
 
 Every failure the user can plausibly cause or recover from gets its own type
 with a human-readable message. The interface layer renders ``str(exc)``
-directly, so messages must be actionable on their own -- no stack traces reach
-the user (CONSTITUTION.md III.2).
+directly, so messages must be actionable on their own (no stack retraces).
 """
 
 from __future__ import annotations
@@ -63,12 +62,7 @@ class ServiceError(LLMError):
 
 
 class ResponseValidationError(LLMError):
-    """The provider replied, but not with data matching our schema.
-
-    This is the guard behind CONSTITUTION.md II.2: raw, unvalidated model text
-    must never reach core logic. When the model returns prose, truncated JSON,
-    or JSON missing required fields, we stop here rather than passing a
-    half-built object downstream.
-    """
+    """The provider replied, but not with data matching our schema so that 
+    raw, unvalidated model text never reaches core logic."""
 
     exit_code = 65  # EX_DATAERR

@@ -40,7 +40,7 @@ class TestLoadSettings:
     def test_defaults_to_a_free_tier_model(self, monkeypatch):
         monkeypatch.setenv("GEMINI_API_KEY", PLACEHOLDER_KEY)
 
-        assert load_settings().gemini_model == "gemini-2.5-flash"
+        assert load_settings().gemini_model == "gemini-3.6-flash"
 
     def test_environment_overrides_the_defaults(self, monkeypatch):
         monkeypatch.setenv("GEMINI_API_KEY", PLACEHOLDER_KEY)

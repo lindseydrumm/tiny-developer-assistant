@@ -4,11 +4,11 @@
 ### Structures
 
 **Settings**: strict pydantic settings that configure model with default or user-defined parameters, including:
-- `model_config`: from env file
-- `gemini_api_key`: required for model access
+- `model_config`: from environment or .env file
+- `gemini_api_key`: required for model access - no default for security reasons
 - `gemini_model`: default is `gemini-3.6-flash`
 - `request_timeout`: per-request timeout in seconds
-- `max_retries`: retry attempts for throttling and server-side failures
+- `max_retries`: max retry attempts for throttling and server-side failures
 - `max_snippet_chars`: rejects snippets larger than specified limit
 
 ### Dependencies
@@ -33,9 +33,10 @@
 ## LLM Client
 ### Structures
 
-**StructuredLLMClient**: defines structure for the LLM agent, including system instructions, prompt, and response. 
+**StructuredLLMClient**: defines structure for the LLM agent which can be adapted to different models via subclasses
+- includes system instructions, user prompt, and response schema
 
-**GeminiClient**: initializes connections to Google Gemini models
+**GeminiClient**: initializes connections to Google Gemini models using `StructuredLLMClient` and Gemini SDK, raising errors when appropriate
 
 ### Dependencies
 **httpx**: used to handle API requests, Gemini APIs in this case
@@ -69,7 +70,7 @@
 ### Structures
 **AnalysisRequest**: contains the user's code snippet and any context (language, filename, focus question) 
 
-**CodeAnalyzer**: contains LLM client info and converts `AnalysisRequest` into `CodeAnalysis` class 
+**CodeAnalyzer**: contains LLM client info and converts `AnalysisRequest` into `CodeAnalysis` class from `prompts.py`, which is given back in the CLI output
 - `analyze` helper function handles `AnalysisRequest` instance, builds user prompt, and returns an LLM client containing instructions, prompt, and CodeAnalysis schema
 - `validate` helper function checks for empty input or max character violations
 
@@ -82,7 +83,7 @@
 
 **.errors**: our error library
 
-**llm_client**: `StructuredLLMClient` protocol 
+**llm_client**: `StructuredLLMClient` protocol to connect to the analyzer
 
 **prompts**: essential functions and prompt strings from `prompts.py`
 - `SYSTEM_PROMPT`
@@ -90,7 +91,7 @@
 - `build_user_prompt`
 
 ### Functions
-`build_analyzer`: takes config settings and outputs CodeAnalyzer instance
+`build_analyzer`: takes config settings and outputs a CodeAnalyzer object 
 
 ## Errors
 Contains exit code for every kind of error, including:
@@ -127,6 +128,8 @@ Contains exit code for every kind of error, including:
 
 ## Interface
 ### Structures
+**Spinner**: a one-line status bar while provider is working, exits and erases when output or error message is generated
+
 
 ### Dependencies
 **sys**: handles command-line input
@@ -157,3 +160,46 @@ Contains exit code for every kind of error, including:
 `bullet`: specifies format for bullet-pointed text
 
 ## Testing
+Robust tests are run on each module using assertion checks and `monkeypatch` for mock runs
+To run all tests, use command
+```
+pytest
+```
+Additional testing was done with direct CLI input, using functions written in different languaages and local files.
+
+`conftest.py`: Uses `pytest` library to initialize testing using valid analysis objects in clean environments (without env variables)
+
+`helpers.py`: builders used by test modules without contacting network 
+- `make_response`: uses `google.genai` type to construct real content response rather than mocks to be used in tests
+- `analysis_payload`: a mock dict to test against CodeAnalysis class
+
+`test_analyzer.py`: initializes a FakeClient object to run tests on data input and validation
+- **TestAnalyze** checks that `CodeAnalyzer` correctly receives and passes along Client output, correctly takes in `SYSTEM_PROMPT` and schema, correctly passes along context into the prompt, and correctly numbers the lines of code
+- **TestInputValidation** checks that blank or oversized is rejected before API call is made, and that proper input is accepted
+
+`test_cli.py` uses `FakeStdin` and `StubAnalyzer` to run tests on CLI behavior
+- **TestInput** checks that the CLI can read files, read stdin, recognize '-' signal for stdin, passes along input flags, overrides default settings when prompted, prompts user when waiting for stdin, and rejects unreadable files.
+- **TestRendering** checks that the CLI output has all three sections, includes content, outputs proper JSON code, and handles an analysis that does not require refactoring.
+- **TestErrorReporting** checks that the error exit codes match what is expected, error messages give guidance, and a missing API key is reported.
+
+`test_config.py`: tests configuration loading and security
+- **TestLoadSettings** checks for missing API key and subsequent setup instructions, API key loading from environment, API key loading from .env file, default free model use, overrides from environment, command-line preferences override defaults, empty .env key is rejected before API call, and invalid API parameters (max retries, request timeout, max snippet chars) are reported
+- **TestSecretsBoundary** checks that the API key parameter in config settings is required (no default) and that the key is not in the `config.py` source code
+
+`test_progress.py`: tests progress bar output using `FakeStream` for varying encoding and terminal settings
+- **TestQuietWhenNotATerminal** checks that the spinner is properly silence (inactive) and does not crash when not in a terminal
+- **TestDrawsOnATerminal** checks that the spinner animates and then erases for clean output
+- **TestExceptionSafety** checks that the spinner erases and sends error message to user when an error is raised
+- **TestFrameSelection** checks that fallback spinner frames are utilized on limited/unknown encoders
+
+`test_prompts.py`: tests that the prompt is formatted correctly and contains all the important information
+- **TestNumberLines** checks that lines are numbered and formatted correctly, empty input is handled, and blank lines and indentation are preserved
+- **TestBuildUserPrompt** checks that the user prompt contains delimiters around code, infers unspecified language, states a supplied language, omits a filename when it is absent, and includes a focus question if supplied
+- **TestSystemPrompt** checks that the system prompt forbids code execution
+- **TestSchema** checks that the schema contains the three required output blocks, contains every field description, and that the provider is passed a JSON schema 
+
+`test_response_parsing.py`: 
+- **TestExtract** checks that `extract()` returns a SDK-parsed instance or valid JSON, rejects invalid JSON, rejects invalid refactoring enum value, rejects an invalid list of key points, rejects plain text prose, rejects an empty or truncated response, and rejects a blocked response for safety
+- **TestTranslateApiError** checks that all genai API errors are translated into the specified actionable messages
+- **TestExcerpt** checks `excerpt()` function from `llm_client.py` that code snippet is not empty, does not have extra whitespace, and is truncated with a limit
+

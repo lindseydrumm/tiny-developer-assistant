@@ -1,16 +1,15 @@
 """Provider instantiation, retries, and schema validation.
 
-This is the only module in the application that imports the provider SDK
-(CONSTITUTION.md I.2). Everything above it depends on the
+This is the only module in the application that imports the provider SDK. Everything above it depends on the
 :class:`StructuredLLMClient` protocol, so swapping providers means adding a
-sibling class here and changing :func:`build_client` -- nothing else.
+sibling class here and changing :func:`build_client`.
 
 Two invariants this module upholds:
 
 * Nothing leaves ``generate_structured`` except a validated instance of the
-  caller's schema. Raw model text never escapes (CONSTITUTION.md II.2).
+  caller's schema. Raw model text never escapes.
 * Every provider exception is translated into a :mod:`dev_assistant.core.errors`
-  type carrying a message a user can act on (CONSTITUTION.md III.2).
+  type carrying a message a user can act on.
 """
 
 from __future__ import annotations
@@ -35,7 +34,7 @@ from dev_assistant.core.errors import (
 
 SchemaT = TypeVar("SchemaT", bound=BaseModel)
 
-#: Status codes worth retrying: throttling plus transient upstream failures.
+#: Status codes worth retrying: throttling and upstream failures.
 _RETRYABLE_STATUS = [429, 500, 502, 503, 504]
 
 #: Substrings that mark a 400 as a credentials problem rather than a bad request.
@@ -45,7 +44,7 @@ _AUTH_HINTS = ("api key not valid", "api_key_invalid", "invalid api key")
 
 
 class StructuredLLMClient(Protocol):
-    """The narrow surface the analyzer depends on."""
+    """The interface the analyzer depends on - only cares about ``generate_structured``."""
 
     def generate_structured(
         self,
@@ -59,7 +58,7 @@ class StructuredLLMClient(Protocol):
 
 
 class GeminiClient:
-    """A :class:`StructuredLLMClient` backed by Google's Gemini models."""
+    """A :class:`StructuredLLMClient` for Google's Gemini models."""
 
     def __init__(self, settings: Settings) -> None:
         self._model = settings.gemini_model
@@ -168,12 +167,9 @@ def _extract(response: types.GenerateContentResponse, schema: type[SchemaT]) -> 
     if isinstance(response.parsed, schema):
         return response.parsed
 
-    # Otherwise validate the raw body ourselves. Two reasons not to lean on
-    # `response.parsed` alone: it is None whenever the model answered with
-    # prose or malformed JSON, and its declared type is a loose union that
-    # silently coerces an unrecognised payload into a bare BaseModel. Going
-    # back to the text keeps this the real enforcement point for
-    # CONSTITUTION.md II.2 and yields field-level errors worth showing a user.
+    # Otherwise validate the raw body ourselves. Going back to the text 
+    # keeps this the real enforcement point and yields field-level errors 
+    # worth showing a user.
     raw = response.text
     if not raw or not raw.strip():
         raise ResponseValidationError(
@@ -256,9 +252,5 @@ def _excerpt(text: str | None, limit: int = 300) -> str:
 
 
 def build_client(settings: Settings) -> StructuredLLMClient:
-    """Construct the configured provider client.
-
-    The single place that names a concrete provider. Adding a second backend
-    means adding a branch here, not touching the analyzer or the CLI.
-    """
+    """Construct the configured provider client, separate from the analyzer and CLI."""
     return GeminiClient(settings)

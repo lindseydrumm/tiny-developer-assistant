@@ -1,9 +1,5 @@
-"""Command-line entry point.
-
-The only layer that reads argv, touches the filesystem, or writes to a stream.
-It catches :class:`~dev_assistant.core.errors.CodeExplainerError` and prints
-``str(exc)`` -- users see guidance, never a traceback (CONSTITUTION.md III.2).
-"""
+"""Command-line entry point. The only layer that reads argv, touches the 
+filesystem, or writes to a stream."""
 
 from __future__ import annotations
 
@@ -104,7 +100,7 @@ def _read_source(path: Optional[Path]) -> tuple[str, Optional[str]]:
     """Return ``(code, display_name)`` from a file or stdin.
 
     The file is read as text and passed along as text. Nothing here imports,
-    compiles, or runs it (CONSTITUTION.md II.3).
+    compiles, or runs it.
     """
     if path is None or str(path) == "-":
         # A bare `explain` in a terminal is almost always a mistake, so it gets

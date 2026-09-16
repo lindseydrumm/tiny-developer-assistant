@@ -1,9 +1,8 @@
-"""Business logic: validate a snippet, get it analyzed, hand back the result.
+"""Validate a snippet, get it analyzed, hand back the result.
 
-Imports nothing from :mod:`dev_assistant.interface` and never prints
-(CONSTITUTION.md III.1). It talks to the provider only through the
+It talks to the provider only through the
 :class:`~dev_assistant.core.llm_client.StructuredLLMClient` protocol, so tests
-substitute a fake client and exercise this layer with no network.
+substitute a fake client with no network.
 """
 
 from __future__ import annotations
@@ -47,8 +46,7 @@ class CodeAnalyzer:
 
         Args:
             request: The snippet and its context. ``request.code`` is treated
-                strictly as text -- it is never executed, imported, or compiled
-                (CONSTITUTION.md II.3).
+                strictly as text and is never executed.
 
         Returns:
             A fully validated analysis.
@@ -91,7 +89,7 @@ class CodeAnalyzer:
 
 
 def build_analyzer(settings: Settings) -> CodeAnalyzer:
-    """Wire an analyzer to the configured provider."""
+    """Connect an analyzer to the configured provider."""
     return CodeAnalyzer(
         build_client(settings),
         max_snippet_chars=settings.max_snippet_chars,

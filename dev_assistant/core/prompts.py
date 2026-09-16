@@ -1,14 +1,4 @@
-"""System prompts and response schema definitions.
-
-Per CONSTITUTION.md III.1 this module holds prompts and schemas *exclusively*.
-It performs no I/O and imports nothing from the rest of the application, which
-means the schemas below can be imported by tests without touching config, the
-network, or the provider SDK.
-
-The schema is the contract enforced in CONSTITUTION.md II.2: the provider is
-asked to emit JSON matching :class:`CodeAnalysis`, and nothing that fails to
-validate against it is allowed into core logic.
-"""
+"""System prompts and response schema definitions."""
 
 from __future__ import annotations
 
@@ -75,9 +65,8 @@ class Refactoring(BaseModel):
 class CodeAnalysis(BaseModel):
     """The complete structured analysis of one snippet.
 
-    The three top-level deliverables required by CONSTITUTION.md IV map to
-    :attr:`summary`, :attr:`blocks`, and :attr:`refactorings`.
-    """
+    The three top-level deliverables map to :attr:`summary`, :attr:`blocks`, 
+    and :attr:`refactorings`."""
 
     language: str = Field(
         description="The detected programming language, e.g. 'Python'. Use 'unknown' if unclear."
